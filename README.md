@@ -40,16 +40,16 @@ The Ghostscript `DEVICE` is set to `pdfwrite` automatically.
 
 These are the patch arguments and default values:
 * `/from-top true` — measure from top of page
-* `/offset-x 0` — (mm)
-* `/offset-y 0` — (mm)
+* `/offset-x 0` — fixed horizontal offest (mm)
+* `/offset-y 0` — fixed vertical offest (mm)
 * `/page 1` — page number, 1 to last
 * `/font (Times-Roman)` — font resource name
 * `/fontsize 12` — point size
 * `/text ()` — text to write
-* `/x 0` — (mm)
+* `/x 0` — rectangle left or text insert point (mm)
 * `/y 0` — (mm) recatngle bottom or text baseline
-* `/width 100` — (mm)
-* `/height 100` — (mm)
+* `/width 100` — rectangle width (mm)
+* `/height 100` — rectangle height (mm)
 * `/colour 16#FFFFFF` — paint colour (RRGGBB)
 * `/operation null` — `rect` or `write`
 
