@@ -164,7 +164,10 @@
     pop
     argname status { % exists
         /argfile argname (r) file def
-    } if
+    }{
+        (%stderr) (w) file (missing patch script ) argname cat (\n) cat writestring
+        quit
+    } ifelse
 } if
 
 /argfile where {
@@ -245,4 +248,3 @@ counttomark 0 ne { /DOCINFO pdfmark }{ pop } ifelse
 % <file> runpdfbegin -
 % - runpdfend -
 % - runpdfpagerange <firstpage#> <lastpage#>
-
