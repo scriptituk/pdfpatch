@@ -9,9 +9,9 @@ It could alternatively be done using annotation pdfmarks but this solution is le
 
 ## Usage
 
-`gs -q -dNODISPLAY -o out.pdf -sPDFname=in.pdf -- pdfpatch.ps args`  
+`gs -q -sDEVICE=pdfwrite -o out.pdf -sPDFname=in.pdf -- pdfpatch.ps args`  
 to pass patch arguments on the commandline, or  
-`gs -q -dNODISPLAY -o out.pdf -sPDFname=in.pdf -sargname=args.txt pdfpatch.ps`  
+`gs -q -sDEVICE=pdfwrite -o out.pdf -sPDFname=in.pdf -sargname=args.txt pdfpatch.ps`  
 to read patch arguments from a script file.
 Patch arguments are in PostScript dictionary syntax, e.g.:  
 ```
@@ -34,7 +34,6 @@ Ghostscript options can be used as well, of course, e.g.
 `-dCompatibilityLevel=1.x` — set PDF compatibility to 1.2 or higher  
 `-dCompressPages=false` — output uncompressed PDF  
 `-dFILTERIMAGE` — remove images  
-The Ghostscript `DEVICE` is set to `pdfwrite` automatically.
 
 ## Arguments
 
