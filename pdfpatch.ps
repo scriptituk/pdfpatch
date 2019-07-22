@@ -1,0 +1,248 @@
+%!PS-Adobe-3.0
+
+% pdfpatch.ps
+% PDF patch utility by Raymond Luckhurst, scriptit.uk
+% Applies patches of text and shapes to amend or correct PDFs simply without using annotation pdfmarks
+%
+% See https://github.com/scriptituk/pdfpatch/blob/master/README.md for Documentation.
+%
+% Input  file is named PDFname
+% Patch arguments file is named argname
+%
+% Run using:
+%  gs -q -dNODISPLAY -o out.pdf -sPDFname=in.pdf -- pdfpatch.ps args
+%  gs -q -dNODISPLAY -o out.pdf -sPDFname=in.pdf -sargname=args.txt pdfpatch.ps
+%  use -sPDFtitle='My Title' to set metadata Title
+%  use -sPDFauthor='My Name' to set metadata Author
+%  use -sPDFsubject='My Subject' to set metadata Subject
+%  use -dCompatibilityLevel=1.x for PDF 1.2 or higher compatibility
+%  use -dCompressPages=false for uncompressed PDF
+%  use -dFILTERIMAGE to remove images
+%  args in argname file or on commandline are in PostScript dictionary syntax, e.g.:
+%       /page 2 /colour 16#ffee11 /x 20 /y 100 /width 20 /height 5 /operation (rect)
+%       /page 1 /colour 0 /x 21 /y 99 /font (Arial,Italic) /fontsize 11 /text (my text) /operation (write)
+%  use gs -q -dNODISPLAY -dShowFonts pdfpatch.ps to show available fonts
+
+/Patches [ % patch args remain set for subsequent patches
+    <<
+        /from-top true % measure from top of page
+        /offset-x 0 % mm
+        /offset-y 0 % mm
+        /page 1 % 1 to last
+        /font (Times-Roman) % font resource name
+        /fontsize 12 % points
+        /text () % text to write
+        /x 0 % mm
+        /y 0 % mm
+        /width 100 % mm
+        /height 100 % mm
+        /colour 16#FFFFFF % RRGGBB
+        /operation null % rect or write
+    >>
+] def
+
+% procs from https://github.com/scriptituk/pslutils
+
+/cat {
+    exch
+    dup length 2 index length add string
+    dup dup 5 2 roll
+    copy length exch putinterval
+} bind def
+
+/mm {
+    360 mul 127 div % x 72 / 25.4
+} bind def
+
+/rgb {
+    16#FFFFFF and
+    dup dup
+    -16 bitshift 255 div
+    exch -8 bitshift 16#FF and 255 div
+    3 -1 roll 16#FF and 255 div
+} bind def
+
+/insertionsort {
+    exch
+    1 1 2 index length 1 sub {
+        2 copy get
+        1 index -1 1 {
+            3 index 1 index 1 sub get
+            dup 3 index 7 index exec le { pop exit } if
+            4 index exch 2 index exch put
+            1 eq { 0 } if
+        } for
+        3 -1 roll
+        1 index ne {
+            exch 3 copy put
+        } if
+        pop pop
+    } for
+    exch pop
+} bind def
+
+% procs
+
+/getx {
+    x offset-x add mm
+    Page get_media_box pop 0 get add
+} bind def
+
+/gety {
+    y offset-y add mm
+    from-top {
+        Page get_media_box pop 3 get exch sub
+    }{
+        Page get_media_box pop 1 get add
+    } ifelse
+} bind def
+
+/applypatch {
+    { % case
+        operation (rect) eq {
+            colour rgb setrgbcolor
+            getx gety width mm height mm rectfill
+            exit
+        } if
+        operation (write) eq {
+            colour rgb setrgbcolor
+            font fontsize selectfont
+            getx gety moveto
+            text show
+            exit
+        } if
+        exit
+    } loop
+} bind def
+
+/applypatches {
+    Patches {
+        begin
+        Page# page eq {
+            applypatch
+        } if
+        end
+    } forall
+} bind def
+
+% fonts
+
+/ShowFonts where {
+    pop
+    ShowFonts {
+        /Fonts [ (*) { dup length string copy } 200 string /Font resourceforall ] {} insertionsort def
+        Fonts { = } forall
+        quit
+    } if
+} if
+
+% get source PDF
+
+/PDFname where {
+    pop
+    PDFname status { % exists
+        /PDFfile PDFname (r) file def
+    } if
+} if
+
+/PDFfile where {
+    pop
+}{
+    (%stderr) (w) file (missing source PDF, use -sPDFname=MyPDF.pdf\n) writestring
+    quit
+} ifelse
+
+% device
+
+currentpagedevice /OutputDevice get /pdfwrite ne {
+    << /OutputDevice /pdfwrite /OutputFile systemdict /OutputFile get >> setpagedevice
+} if
+
+% get args
+
+/argname where { % given
+    pop
+    argname status { % exists
+        /argfile argname (r) file def
+    } if
+} if
+
+/argfile where {
+    pop
+}{ % read from shell args
+    0 string [ .shellarguments pop ] { cat ( ) cat } forall
+    0 () /SubFileDecode filter
+    /argfile exch def
+} ifelse
+
+/arg null def
+{ % parse patch args into Patches array
+    argfile token {
+        dup type /nametype eq {
+            /arg exch def
+        }{
+            Patches dup length 1 sub get
+            dup arg known {
+                dup arg 4 -1 roll put
+                arg /operation eq {
+                    % each patch ends with a /operation pair and is then cloned with a null operation
+                    /Patches Patches length 1 add array Patches 1 index copy pop def % add a patch
+                    dup length dict copy % clone
+                    Patches dup length 1 sub 2 index put % append
+                    dup /operation null put
+                    /arg null def
+                } if
+                pop
+            }{
+                pop pop
+            } ifelse
+        } ifelse
+    }{
+        exit
+    } ifelse
+} loop
+
+% run
+
+PDFfile runpdfbegin
+
+process_trailer_attrs
+
+/FirstPage where { pop }{ /FirstPage 1 def } ifelse
+/LastPage where { pop }{ /LastPage pdfpagecount def } ifelse
+FirstPage 1 LastPage {
+    dup /Page# exch store
+    << /EndPage { exch pop 0 eq dup { applypatches } if } >> setpagedevice
+    pdfgetpage pdfshowpage
+} for
+
+runpdfend
+
+% do metadata
+
+mark
+/PDFtitle where { pop /Title PDFtitle } if
+/PDFauthor where { pop /Author PDFauthor } if
+/PDFsubject where { pop /Subject PDFsubject } if
+counttomark 0 ne { /DOCINFO pdfmark }{ pop } ifelse
+
+% /GS_PDF_ProcSet procs in ghostscript pdf_main.ps:
+%
+% <pagedict> get_any_box <box name> <box>
+% <pagedict> get_media_box <box> <bool>
+% firstpage# lastpage# dopdfpages -
+% <dict> pdfclose -
+% <int> pdfgetpage <pagedict>
+% <file> pdfopen <dict>
+% <pagedict> pdfpagecontents <contents>
+% - pdfpagecount <int>
+% <pagedict> pdfpagenumber <int>
+% <pagedict> pdfshowpage -
+% <pagedict> <key> pget <value> -true-
+% <pagedict> <key> pget -false-
+% - process_trailer_attrs -
+% <file> runpdf -
+% <file> runpdfbegin -
+% - runpdfend -
+% - runpdfpagerange <firstpage#> <lastpage#>
+
