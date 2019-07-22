@@ -47,10 +47,10 @@ These are the patch arguments and default values:
 * `/fontsize 12` — point size
 * `/text ()` — text to write
 * `/x 0` — rectangle left or text insert point (mm)
-* `/y 0` — (mm) recatngle bottom or text baseline
+* `/y 0` — rectangle bottom or text baseline (mm)
 * `/width 100` — rectangle width (mm)
 * `/height 100` — rectangle height (mm)
-* `/colour 16#FFFFFF` — paint colour (RRGGBB)
+* `/colour 16#000000` — paint colour (RRGGBB)
 * `/operation null` — `rect` or `write`
 
 Each patch ends when an `/operation` value is encountered, then it is cloned for the next patch operation.
