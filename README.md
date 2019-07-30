@@ -1,11 +1,11 @@
 # pdfpatch
 
-A simple patching tool to modify PDF pages.
+A simple patching tool to modify PDF pages using Ghostscript.
 
 This executes a patch script to overlay opaque masks and text.
 
 It works by executing a custom PostScript `/EndPage` procedure when `showpage` is invoked, at the end of each page that needs patching.
-It could alternatively be done using annotation pdfmarks but this solution is less coding effort!
+An alternative is to use annotation pdfmarks or annotator software like [mutool](https://mupdf.com/docs/manual-mutool-run.html) but this solution is simple and generates content stream data.
 
 ## Usage
 
