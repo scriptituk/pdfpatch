@@ -10,8 +10,8 @@
 % Patch arguments file is named argname
 %
 % Run using:
-%  gs -q -dNODISPLAY -o out.pdf -sPDFname=in.pdf -- pdfpatch.ps args
-%  gs -q -dNODISPLAY -o out.pdf -sPDFname=in.pdf -sargname=args.txt pdfpatch.ps
+%  gs -q -dNOSAFER -sDEVICE=pdfwrite -o out.pdf -sPDFname=in.pdf -- pdfpatch.ps args
+%  gs -q -dNOSAFER -sDEVICE=pdfwrite -o out.pdf -sPDFname=in.pdf -sargname=args.txt pdfpatch.ps
 %  use -sPDFtitle='My Title' to set metadata Title
 %  use -sPDFauthor='My Name' to set metadata Author
 %  use -sPDFsubject='My Subject' to set metadata Subject
@@ -215,7 +215,7 @@ process_trailer_attrs
 /LastPage where { pop }{ /LastPage pdfpagecount def } ifelse
 FirstPage 1 LastPage {
     dup /Page# exch store
-    << /EndPage { exch pop 0 eq dup { applypatches } if } >> setpagedevice
+    << /EndPage { exch pop 0 eq dup { applypatches } if } bind >> setpagedevice
     pdfgetpage pdfshowpage
 } for
 
