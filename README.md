@@ -5,13 +5,14 @@ A simple patching tool to modify PDF pages using Ghostscript.
 This executes a patch script to overlay opaque masks and text.
 
 It works by executing a custom PostScript `/EndPage` procedure when `showpage` is invoked, at the end of each page that needs patching.
-An alternative is to use annotation pdfmarks or annotator software like [mutool](https://mupdf.com/docs/manual-mutool-run.html) but this solution is simple and generates content stream data.
+An alternative is to use annotation pdfmarks or annotator software like [mutool](https://mupdf.com/docs/manual-mutool-run.html) but this solution is simple and accurate, and avoids annotations which are not always supported.
+Note that with Ghostscript V9.21 the -dPreserveAnnots=false switch renders PDF annotations as content stream data.
 
 ## Usage
 
-`gs -q -sDEVICE=pdfwrite -o out.pdf -sPDFname=in.pdf -- pdfpatch.ps args`  
+`gs -q -dNOSAFER -sDEVICE=pdfwrite -o out.pdf -sPDFname=in.pdf -- pdfpatch.ps args`  
 to pass patch arguments on the commandline, or  
-`gs -q -sDEVICE=pdfwrite -o out.pdf -sPDFname=in.pdf -sargname=args.txt pdfpatch.ps`  
+`gs -q -dNOSAFER -sDEVICE=pdfwrite -o out.pdf -sPDFname=in.pdf -sargname=args.txt pdfpatch.ps`  
 to read patch arguments from a script file.
 Patch arguments are in PostScript dictionary syntax, e.g.:  
 ```
@@ -58,7 +59,7 @@ Each patch ends when an `/operation` value is encountered, then it is cloned for
 
 This fragment changes words in Old English to modern language for an old hymn:  
 ![before](https://user-images.githubusercontent.com/35268161/61661018-10aec480-acc3-11e9-8171-89dfa914fc76.png)
-![after](https://user-images.githubusercontent.com/35268161/61661019-10aec480-acc3-11e9-9525-6b727bf87366.png)
+![after](https://user-images.githubusercontent.com/35268161/104820375-35d6b180-582c-11eb-911b-7ed7ea5dedda.png)
 (The cream rub-out patches would normally be white)  
 The patch script looks like:
 ```
