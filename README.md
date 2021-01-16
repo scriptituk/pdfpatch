@@ -58,8 +58,8 @@ Each patch ends when an `/operation` value is encountered, then it is cloned for
 ## Example
 
 This fragment changes words in Old English to modern language for an old hymn:  
-![before](https://user-images.githubusercontent.com/35268161/61661018-10aec480-acc3-11e9-8171-89dfa914fc76.png)
-![after](https://user-images.githubusercontent.com/35268161/104820375-35d6b180-582c-11eb-911b-7ed7ea5dedda.png)
+![before](https://user-images.githubusercontent.com/35268161/61661018-10aec480-acc3-11e9-8171-89dfa914fc76.png)  
+![after](https://user-images.githubusercontent.com/35268161/104820375-35d6b180-582c-11eb-911b-7ed7ea5dedda.png)  
 (The cream rub-out patches would normally be white)  
 The patch script looks like:
 ```
